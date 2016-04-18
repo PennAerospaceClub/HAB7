@@ -1,14 +1,14 @@
 void dataSD(String dataString){
   File dataFile = SD.open("data.csv", FILE_WRITE);
   dataFile.println(dataString);
-  dataFile.close();
+  dataFile.flush();
   Serial.println("Printed to SD");
 }
 
 void logSD(String logString){
   File logFile = SD.open("log.txt", FILE_WRITE);
   logFile.println(logString);
-  logFile.close();
+  logFile.flush();
   Serial.println("Printed to SD");
 }
 

@@ -1,19 +1,11 @@
 //Maximum Runtime ~50 days due to millis() resetting
 
-//IMU
 #include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_LSM303_U.h>
-#include <Adafruit_L3GD20_U.h>
-#include <Adafruit_9DOF.h>
 #include <Time.h>
 #include <Adafruit_SI1145.h> //UV
-#include <Servo.h> //TODO: Update to slow servo speed
-//SD
-#include <SD.h>
-#include <SPI.h>
-//Serial
-#include <SoftwareSerial.h>
+#include <VarSpeedServo.h> //TODO: Update to slow servo speed
+#include <SD.h> //SD
+#include <SPI.h> //SD
 
 //UV
 Adafruit_SI1145 uv = Adafruit_SI1145();
@@ -22,21 +14,13 @@ Adafruit_SI1145 uv = Adafruit_SI1145();
 String imuData = "";
 String uvData = "";
 
-//IMU
-Adafruit_9DOF                dof   = Adafruit_9DOF();
-Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(30301);
-Adafruit_LSM303_Mag_Unified   mag   = Adafruit_LSM303_Mag_Unified(30302);
-Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
-
-//Adafruit_BMP085_Unified       bmp   = Adafruit_BMP085_Unified(18001); //10dof
-
 //Position
 //Boundary Box UPDATE DAY OF LAUNCH WITH MOST RECENT SIMULATION
-long int minLat = 39596216;//xx°xx.xxxx' 40010950
-long int maxLat = 40297450; //40337066
-long int minLong = 76208483; //75462700
-long int maxLong = 77093716; //77044366
-long int maxWantedAlt = 10000; //Maximum wanted altitude (BDRY) 31000
+const long int minLat = 39596216;//xx°xx.xxxx' 40010950
+const long int maxLat = 40297450; //40337066
+const long int minLong = 76208483; //75462700
+const long int maxLong = 77093716; //77044366
+const long int maxWantedAlt = 10000; //Maximum wanted altitude (BDRY) 31000
 
 //Initialize Location Data
 long int lat = -1; 
@@ -46,9 +30,6 @@ long int maxAlt = 0; //measures in meters
 
 //GPS Utility
 String field = "";
-String slat = "";
-String slongit = "";
-String salt = "";
 boolean gooddata = false;
 unsigned long int gpsMaxSearchTime = millis() + 5000;
 
@@ -84,7 +65,7 @@ int nichromeCounter = 0;
 
 //Servo
 const int SERVO_PIN = 12;
-Servo releaseServo;
+VarSpeedServo releaseServo;
 
 //Solar Panel
 #define SOLAR_PIN A0
@@ -93,6 +74,7 @@ int solarVal = 0;
 void setup() {
   Serial.begin(9600);
   Serial1.begin(9600); //GPS
+  Serial2.begin(9600); //
   
   //LED
   pinMode(LED_GREEN, OUTPUT); digitalWrite(LED_GREEN, HIGH);
@@ -125,28 +107,16 @@ void setup() {
 
 void loop() {
   while(!sane){
-    sane = initSane();
+      sane = initSane();
       readGPS();
       Serial.print(lat); Serial.print(", "); Serial.print(longit); Serial.print(", "); Serial.println(alt); 
   }
 
-  Serial.print("GPS, ");
   readGPS();
-  //Serial.print(lat); Serial.print(", "); Serial.print(longit); Serial.print(", "); Serial.println(alt); 
-
-  Serial.print("IMU, ");
   runIMU();
-  //Serial.println(imuData);
-
-  Serial.print("UV, ");
   runUV();
-  //Serial.println(uvData);
-
-  Serial.print("Nich, ");
   nichromeCheck();
-  servoCheck(); //for now
-
-  Serial.println("Solar");
+  servoCheck();
   solarVal = analogRead(SOLAR_PIN);
   
   //Time Controlled: SD, Serial LED

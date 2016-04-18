@@ -1,5 +1,6 @@
 void readGPS(){
   gooddata = false;
+  gpsMaxSearchTime = millis() + 5000;
   while(!gooddata){
     while(Serial1.available() && gpsMaxSearchTime > millis()){
       if((char)Serial1.read() == '$'){
@@ -19,14 +20,14 @@ void readGPS(){
           index1 = field.indexOf(",", index1 + 1);
           int index2 = field.indexOf(",", index1 + 1);
           
-          slat = field.substring(index1 + 1, index2);
+          String slat = field.substring(index1 + 1, index2);
           slat.remove(4, 1);
   
           index1 = index2;
           index1 = field.indexOf(",", index1 + 1);
           index2 = field.indexOf(",", index1 + 1);
   
-          slongit = field.substring(index1 + 1, index2);
+          String slongit = field.substring(index1 + 1, index2);
           slongit.remove(0, 1); slongit.remove(4, 1);
   
           index1 = index2;
@@ -36,7 +37,7 @@ void readGPS(){
           index1 = field.indexOf(",", index1 + 1);
           index2 = field.indexOf(".", index1 + 1);
           
-          salt = field.substring(index1 + 1, index2);
+          String salt = field.substring(index1 + 1, index2);
   
           lat = slat.toInt();
           longit = slongit.toInt();
@@ -52,7 +53,6 @@ void readGPS(){
         field = "";
       }
     }
-  gpsMaxSearchTime = millis() + 5000;
   }
 }
 
