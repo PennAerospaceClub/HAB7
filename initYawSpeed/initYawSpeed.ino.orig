@@ -17,11 +17,16 @@ Adafruit_L3GD20_Unified       gyro  = Adafruit_L3GD20_Unified(20);
 #define SERVOPINX 10
 #define SERVOPINZ1 9
 #define SERVOPINZ2 6
+<<<<<<< HEAD
+VarSpeedServo myservoY; VarSpeedServo myservoX;    
+VarSpeedServo myservoZ1; VarSpeedServo myservoZ2;
+SoftwareSerial port1(3,5);
+=======
 const float pi = 3.14159265358;
+>>>>>>> 6d8f78f09e80a2b5c0b8befc89a6d75b63af8c66
 
 VarSpeedServo myservoY; VarSpeedServo myservoX;
 VarSpeedServo myservoZ1; VarSpeedServo myservoZ2;
-SoftwareSerial port1(3,5);
 
 int goalDirection = 90; //0 to 359  //updated every time IMU receives data
 int currLat;    //Format (8 bit int): 00000000; xx'xx.xxxx"
@@ -44,7 +49,7 @@ int thisDemand = 0;
 void setup(void) {
   Serial.begin(9600);
   port1.begin(9600);
-    
+  
   myservoY.attach(SERVOPINX);
   myservoX.attach(SERVOPINY);
   myservoZ1.attach(SERVOPINZ1);
@@ -71,7 +76,7 @@ void loop(void) {
   if (port1.isListening()) {
     port1.println(printthis);
   }
-
+  
   int servospeed;
   //y
   int temp = constrain((int)(atan(currY / currZ) * 180 / PI + 90), 0, 180);
