@@ -67,7 +67,7 @@ void loop(void) {
   //serial
   String printthis = String(magnetDirection, 2) + "," + String(currX, 2) + "," +
                                                         String(currY, 2) + "," +
-                                                        String(currY, 2) + "#";
+                                                        String(currY, 2) + + ",#";
   if (port1.isListening()) {
     port1.println(printthis);
   }

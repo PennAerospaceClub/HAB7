@@ -3,23 +3,19 @@
 #include <Wire.h>
 #include <Time.h>
 #include <Adafruit_SI1145.h> //UV
-#include <VarSpeedServo.h> //TODO: Update to slow servo speed
+#include <Servo.h> //TODO: Update to slow servo speed
 #include <SD.h> //SD
 #include <SPI.h> //SD
 
-//UV
-Adafruit_SI1145 uv = Adafruit_SI1145();
-
 //Data
 String imuData = "";
-String uvData = "";
 
 //Position
 //Boundary Box UPDATE DAY OF LAUNCH WITH MOST RECENT SIMULATION
-const long int minLat = 39596216;//xx°xx.xxxx' 40010950
-const long int maxLat = 40297450; //40337066
-const long int minLong = 76208483; //75462700
-const long int maxLong = 77093716; //77044366
+const long int minLat = 39000000;       //xx°xx.xxxx' 40010950 //39596216
+const long int maxLat = 40000000;       //40337066             //40297450
+const long int minLong = 75000000;      //75462700             //76208483
+const long int maxLong = 76000000;      //77044366             //77093716
 const long int maxWantedAlt = 10000; //Maximum wanted altitude (BDRY) 31000
 
 //Initialize Location Data
@@ -41,7 +37,6 @@ boolean sane = false;
 boolean inBdry = false;
 boolean falling = true;
 boolean initSD = false;
-boolean initUV = false;
 
 
 //LED
@@ -65,37 +60,24 @@ int nichromeCounter = 0;
 
 //Servo
 const int SERVO_PIN = 12;
-VarSpeedServo releaseServo;
-
-//Solar Panel
-#define SOLAR_PIN A0
-int solarVal = 0;
+Servo valve;
 
 void setup() {
   Serial.begin(9600);
   Serial1.begin(9600); //GPS
-  Serial2.begin(9600); //
+  Serial2.begin(9600); //arduino
   
   //LED
   pinMode(LED_GREEN, OUTPUT); digitalWrite(LED_GREEN, HIGH);
   pinMode(LED_YELLOW, OUTPUT); digitalWrite(LED_YELLOW, HIGH);
   pinMode(LED_RED, OUTPUT); digitalWrite(LED_RED, HIGH);
 
-  //Solar
-  pinMode(SOLAR_PIN, INPUT);
-
-  //IMU
-  initIMU();
-  delay(1000);
-
   //Nichrome
   pinMode(NICHROME_PIN, OUTPUT);
   digitalWrite(NICHROME_PIN, LOW);
 
   //Servo
-  releaseServo.attach(SERVO_PIN);
-  releaseServo.write(10);
-  delay(1000);
+  valve.attach(SERVO_PIN); //Servo that controls valve. 
 
   //End Setup
   digitalWrite(LED_GREEN, LOW);
@@ -113,11 +95,13 @@ void loop() {
   }
 
   readGPS();
-  runIMU();
-  runUV();
   nichromeCheck();
-  servoCheck();
-  solarVal = analogRead(SOLAR_PIN);
+  //servoCheck();
+
+  if(Serial2.available()) {
+    delay(10);
+    imuData = Serial2.readStringUntil('#');
+  }
   
   //Time Controlled: SD, Serial LED
   if(millis() >= nextWrite5){

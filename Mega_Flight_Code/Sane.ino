@@ -13,15 +13,9 @@ boolean initSane(){
       Serial.println("sd");
       initSD = true;
     }
-  }
-  if(!initUV){
-    if (uv.begin()) {
-      Serial.println("uv");
-      initUV = true;
-    }
-  }      
+  }    
   
-  if(inBdry && !falling && initSD && initUV){
+  if(inBdry && !falling && initSD){
     digitalWrite(LED_GREEN, HIGH);
     digitalWrite(LED_RED, LOW);
     digitalWrite(LED_YELLOW, LOW);
